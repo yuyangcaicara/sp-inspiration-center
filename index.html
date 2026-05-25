@@ -104,6 +104,15 @@ textarea:focus { outline: none; border-color: #667eea; }
 
 /* Rule version badge */
 .rule-badge { display: inline-flex; align-items: center; gap: 4px; background: #f0f0ff; color: #667eea; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+
+/* Agent cards */
+.agent-card { display: flex; align-items: center; gap: 14px; padding: 18px 16px; border: 1px solid #e8e8f0; border-radius: 12px; cursor: pointer; transition: all 0.2s; position: relative; }
+.agent-card:hover { border-color: #667eea; box-shadow: 0 4px 12px rgba(102,126,234,0.1); transform: translateY(-2px); }
+.agent-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.agent-info { flex: 1; }
+.agent-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.agent-desc { font-size: 12px; color: #666; line-height: 1.5; }
+.agent-tag { position: absolute; top: 10px; right: 10px; font-size: 10px; padding: 2px 8px; border-radius: 8px; background: #667eea; color: #fff; }
 </style>
 </head>
 <body>
@@ -241,8 +250,75 @@ if (sessionStorage.getItem('sp_auth')) {
 
     <!-- Page: Expand -->
     <div id="page-expand" class="page">
-      <div class="iframe-container">
-        <iframe src="https://extend-bj.clink.cn/customize-tencent/index.html" allow="clipboard-read; clipboard-write"></iframe>
+      <div class="page-header">
+        <h2>🚀 新客拓展</h2>
+        <p>AI 驱动的智能获客工具，助力服务商高效拓展新客户</p>
+      </div>
+      <div class="page-content">
+        <!-- Agent Cards -->
+        <div class="card">
+          <div class="card-title">推荐 Agent</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+            <!-- AI 拓客 -->
+            <div class="agent-card" onclick="window.open('https://extend-bj.clink.cn/customize-tencent/index.html','_blank')">
+              <div class="agent-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);">🎯</div>
+              <div class="agent-info">
+                <div class="agent-name">AI 拓客</div>
+                <div class="agent-desc">智能挖掘潜在客户线索，基于行业大盘数据和投放特征，精准匹配高转化目标人群</div>
+              </div>
+              <div class="agent-tag">推荐</div>
+            </div>
+            <!-- AI 外呼 -->
+            <div class="agent-card" onclick="window.open('https://extend-bj.clink.cn/customize-tencent/index.html','_blank')">
+              <div class="agent-icon" style="background:linear-gradient(135deg,#f093fb,#f5576c);">📞</div>
+              <div class="agent-info">
+                <div class="agent-name">AI 外呼</div>
+                <div class="agent-desc">智能语音外呼系统，自动触达意向客户，支持话术定制和意向分级，提升联系效率</div>
+              </div>
+              <div class="agent-tag">热门</div>
+            </div>
+            <!-- AI 运营 -->
+            <div class="agent-card" onclick="window.open('https://extend-bj.clink.cn/customize-tencent/index.html','_blank')">
+              <div class="agent-icon" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">⚙️</div>
+              <div class="agent-info">
+                <div class="agent-name">AI 运营</div>
+                <div class="agent-desc">客户全生命周期智能运营，自动跟进、标签管理、续费提醒，降低流失率</div>
+              </div>
+              <div class="agent-tag">新</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 数据概览 -->
+        <div class="card">
+          <div class="card-title">拓客数据概览</div>
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="label">本月新增线索</div>
+              <div class="value">1,280</div>
+              <div class="change">较上月 +15.2%</div>
+            </div>
+            <div class="stat-card" style="background:linear-gradient(135deg,#f093fb,#f5576c);">
+              <div class="label">外呼接通率</div>
+              <div class="value">42.6%</div>
+              <div class="change">行业均值 35%</div>
+            </div>
+            <div class="stat-card" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">
+              <div class="label">客户留存率</div>
+              <div class="value">78.3%</div>
+              <div class="change">较上月 +3.1%</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:#999;margin-top:8px;">* 以上为示例数据，实际数据接入后自动更新</p>
+        </div>
+
+        <!-- 嵌入原有页面 -->
+        <div class="card">
+          <div class="card-title">拓客工具</div>
+          <div style="height:600px;border-radius:8px;overflow:hidden;border:1px solid #e8e8f0;">
+            <iframe src="https://extend-bj.clink.cn/customize-tencent/index.html" style="width:100%;height:100%;border:none;" allow="clipboard-read; clipboard-write"></iframe>
+          </div>
+        </div>
       </div>
     </div>
   </main>
