@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>服务商灵感中心</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: #f5f6fa; color: #1a1a2e; min-height: 100vh; }
+
+/* Layout */
+.app { display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: #1a1a2e; color: #fff; padding: 24px 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; display: flex; flex-direction: column; }
+.sidebar-logo { padding: 0 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-logo h1 { font-size: 18px; font-weight: 600; color: #fff; }
+.sidebar-logo p { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+.sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+.nav-item { display: flex; align-items: center; padding: 12px 20px; cursor: pointer; transition: all 0.2s; font-size: 14px; color: rgba(255,255,255,0.7); text-decoration: none; border-left: 3px solid transparent; }
+.nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left-color: #667eea; }
+.nav-item .icon { margin-right: 10px; font-size: 16px; width: 20px; text-align: center; }
+.nav-item .badge { margin-left: auto; background: #667eea; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; }
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px; color: rgba(255,255,255,0.4); }
+
+.main { margin-left: 220px; flex: 1; padding: 0; min-height: 100vh; }
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+.page-header { padding: 24px 32px; background: #fff; border-bottom: 1px solid #e8e8f0; }
+.page-header h2 { font-size: 20px; font-weight: 600; }
+.page-header p { font-size: 13px; color: #666; margin-top: 4px; }
+.page-content { padding: 24px 32px; }
+
+/* Cards */
+.card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #e8e8f0; }
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+/* Form elements */
+textarea { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 12px; font-size: 14px; resize: vertical; font-family: inherit; line-height: 1.6; transition: border-color 0.2s; }
+textarea:focus { outline: none; border-color: #667eea; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+.btn-primary { background: #667eea; color: #fff; }
+.btn-primary:hover { background: #5a6fd6; }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+.btn-secondary { background: #f0f0f5; color: #333; }
+.btn-secondary:hover { background: #e4e4ec; }
+.btn-outline { background: transparent; border: 1px solid #ddd; color: #666; }
+.btn-outline:hover { border-color: #667eea; color: #667eea; }
+
+/* Iframe container */
+.iframe-container { width: 100%; height: calc(100vh - 80px); border: none; border-radius: 0; }
+.iframe-container iframe { width: 100%; height: 100%; border: none; }
+
+/* Review results */
+.review-results { margin-top: 20px; }
+.result-item { padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid; }
+.result-item.danger { background: #fef2f2; border-left-color: #ef4444; }
+.result-item.warning { background: #fffbeb; border-left-color: #f59e0b; }
+.result-item.safe { background: #f0fdf4; border-left-color: #22c55e; }
+.result-item .level { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.result-item.danger .level { color: #ef4444; }
+.result-item.warning .level { color: #f59e0b; }
+.result-item.safe .level { color: #22c55e; }
+.result-item .text { font-size: 14px; color: #333; line-height: 1.6; }
+.result-item .match { background: #fecaca; padding: 1px 4px; border-radius: 3px; }
+.result-item .suggestion { font-size: 13px; color: #666; margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e5e5e5; }
+
+/* AI result */
+.ai-result { background: #f8f9ff; border: 1px solid #e0e4f8; border-radius: 10px; padding: 20px; margin-top: 16px; white-space: pre-wrap; font-size: 14px; line-height: 1.8; }
+.ai-loading { text-align: center; padding: 40px; color: #666; }
+.ai-loading .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #ddd; border-top-color: #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Policy timeline */
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #e8e8f0; }
+.timeline-item { position: relative; padding-bottom: 24px; }
+.timeline-item::before { content: ''; position: absolute; left: -20px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: #667eea; border: 2px solid #fff; box-shadow: 0 0 0 2px #667eea; }
+.timeline-item .date { font-size: 12px; color: #999; margin-bottom: 4px; }
+.timeline-item .title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.timeline-item .desc { font-size: 13px; color: #555; line-height: 1.6; }
+.timeline-item .tags { margin-top: 8px; }
+.timeline-item .tag { display: inline-block; padding: 2px 8px; background: #f0f0ff; color: #667eea; font-size: 11px; border-radius: 4px; margin-right: 6px; }
+
+/* Stats */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 20px; border-radius: 12px; }
+.stat-card .label { font-size: 12px; opacity: 0.8; }
+.stat-card .value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+.stat-card .change { font-size: 12px; margin-top: 4px; opacity: 0.8; }
+
+/* Controls */
+.controls { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.char-count { font-size: 12px; color: #999; text-align: right; margin-top: 4px; }
+
+/* Toggle */
+.toggle-group { display: flex; gap: 0; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+.toggle-btn { padding: 8px 16px; font-size: 13px; cursor: pointer; border: none; background: #fff; transition: all 0.2s; }
+.toggle-btn.active { background: #667eea; color: #fff; }
+
+/* Placeholder */
+.placeholder-box { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; color: #999; text-align: center; }
+.placeholder-box .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+.placeholder-box .text { font-size: 14px; }
+
+/* Rule version badge */
+.rule-badge { display: inline-flex; align-items: center; gap: 4px; background: #f0f0ff; color: #667eea; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+</style>
+</head>
+<body>
+<!-- Gate: Invite Code -->
+<div id="gate" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f6fa;">
+  <div style="background:#fff;padding:48px 40px;border-radius:16px;text-align:center;box-shadow:0 2px 24px rgba(0,0,0,0.06);max-width:380px;width:90%;">
+    <div style="font-size:32px;margin-bottom:12px;">🔐</div>
+    <h2 style="font-size:20px;font-weight:600;margin-bottom:8px;">服务商灵感中心</h2>
+    <p style="font-size:13px;color:#666;margin-bottom:24px;">仅限内部受邀使用 · 请勿外传</p>
+    <input id="invite-code" type="text" placeholder="请输入邀请码" style="width:100%;padding:12px 16px;border:1px solid #ddd;border-radius:8px;font-size:15px;text-align:center;letter-spacing:2px;margin-bottom:16px;" onkeydown="if(event.key==='Enter')checkInvite()">
+    <button onclick="checkInvite()" style="width:100%;padding:12px;background:#667eea;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;">进入</button>
+    <p id="gate-error" style="color:#ef4444;font-size:12px;margin-top:12px;display:none;">邀请码错误，请联系管理员获取</p>
+  </div>
+</div>
+<script>
+const VALID_CODES = ['6688', '8866', '2026'];
+function checkInvite() {
+  const code = document.getElementById('invite-code').value.trim();
+  if (VALID_CODES.includes(code)) {
+    sessionStorage.setItem('sp_auth', code);
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app-main').style.display = 'flex';
+  } else {
+    document.getElementById('gate-error').style.display = 'block';
+  }
+}
+// Auto-pass if already authenticated
+if (sessionStorage.getItem('sp_auth')) {
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app-main').style.display = 'flex';
+  });
+}
+</script>
+
+<div id="app-main" class="app" style="display:none;">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <h1>服务商灵感中心</h1>
+      <p>内部工具平台</p>
+    </div>
+    <div class="sidebar-nav">
+      <a class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+        <span class="icon">📊</span>大盘数据
+      </a>
+      <a class="nav-item" data-page="review" onclick="navigate('review')">
+        <span class="icon">🛡️</span>AI 素材预审
+      </a>
+      <a class="nav-item" data-page="policy" onclick="navigate('policy')">
+        <span class="icon">📋</span>政策信息解读
+      </a>
+      <a class="nav-item" data-page="faq" onclick="navigate('faq')">
+        <span class="icon">💬</span>业务答疑
+      </a>
+      <a class="nav-item" data-page="expand" onclick="navigate('expand')">
+        <span class="icon">🚀</span>新客拓展
+        <span class="badge">现成</span>
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      服务商灵感中心 v0.1<br>仅限内部使用 · 请勿外传
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Page: Dashboard -->
+    <div id="page-dashboard" class="page active">
+      <div class="iframe-container">
+        <iframe src="https://yuyangcaicara.github.io/dashboard-insight/" allow="clipboard-read; clipboard-write"></iframe>
+      </div>
+    </div>
+
+    <!-- Page: AI Review -->
+    <div id="page-review" class="page">
+      <div class="page-header">
+        <h2>🛡️ AI 素材预审</h2>
+        <p>粘贴投放文案，自动检测违规风险并给出合规改写建议</p>
+      </div>
+      <div class="page-content">
+        <div class="card">
+          <div class="card-title">
+            <span>文案输入</span>
+            <span class="rule-badge">规则库 v2026-05-25-r12</span>
+          </div>
+          <textarea id="review-input" rows="8" placeholder="粘贴需要审核的投放文案...&#10;&#10;支持多条文案同时审核，每条一行。"></textarea>
+          <div class="char-count"><span id="char-count">0</span> 字 / <span id="line-count">0</span> 条</div>
+          <div class="controls" style="margin-top: 16px;">
+            <button class="btn btn-primary" onclick="startReview()">🔍 开始审核</button>
+            <button class="btn btn-secondary" onclick="loadExample()">📝 示例文案</button>
+            <button class="btn btn-outline" onclick="clearReview()">🗑️ 清空</button>
+            <label style="margin-left:auto; font-size:13px; color:#666; display:flex; align-items:center; gap:6px;">
+              <input type="checkbox" id="ai-rewrite-toggle" checked> AI 语义复审 + 改写
+            </label>
+          </div>
+        </div>
+
+        <div id="review-results" class="review-results" style="display:none;">
+          <div class="card">
+            <div class="card-title">审核结果</div>
+            <div id="results-container"></div>
+          </div>
+        </div>
+
+        <div id="ai-rewrite-section" style="display:none;">
+          <div class="card">
+            <div class="card-title">🤖 AI 合规改写建议</div>
+            <div id="ai-rewrite-container" class="ai-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page: Policy -->
+    <div id="page-policy" class="page">
+      <div class="page-header">
+        <h2>📋 政策信息解读</h2>
+        <p>腾讯广告平台最新政策动态与解读</p>
+      </div>
+      <div class="page-content">
+        <div class="card">
+          <div class="card-title">最新政策动态</div>
+          <div class="timeline" id="policy-timeline"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page: FAQ -->
+    <div id="page-faq" class="page">
+      <div class="iframe-container">
+        <iframe src="https://miaowen.qq.com/miaowen-station/index" allow="clipboard-read; clipboard-write"></iframe>
+      </div>
+    </div>
+
+    <!-- Page: Expand -->
+    <div id="page-expand" class="page">
+      <div class="iframe-container">
+        <iframe src="https://extend-bj.clink.cn/customize-tencent/index.html" allow="clipboard-read; clipboard-write"></iframe>
+      </div>
+    </div>
+  </main>
+</div>
+</div>
+
+<script>
+// ==================== Navigation ====================
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector('[data-page="' + page + '"]').classList.add('active');
+  location.hash = '#' + page;
+}
+
+// Hash routing
+function handleHash() {
+  const hash = location.hash.replace('#', '') || 'dashboard';
+  navigate(hash);
+}
+window.addEventListener('hashchange', handleHash);
+window.addEventListener('load', handleHash);
+
+// ==================== Review Module ====================
+// Regex rule engine (v2026-05-25-r12) - 参考图书灵感中心
+const REVIEW_RULES = [
+  // 绝对化用语
+  { pattern: /全[国球世]第一|销量最[好大高]|最强|独一无二|无人能[比及]|史上最/g, category: '绝对化用语', level: 'danger', suggestion: '避免使用"最""第一""独一无二"等绝对化表述，可改为"领先""优质"等相对表述' },
+  { pattern: /100%|百分之百|保证有效|永不失败|万无一失|绝对安全/g, category: '承诺性用语', level: 'danger', suggestion: '不得对效果做绝对承诺，可改为"助力提升""有效辅助"等表述' },
+  { pattern: /国家级|国家认证|政府推荐|央视推荐|官方认证/g, category: '虚假背书', level: 'danger', suggestion: '未经授权不得使用国家机关/媒体背书，需提供相关授权证明' },
+  // 虚假促销
+  { pattern: /原价\d+.*?现[价仅]|限时\d+折|今日特价|仅剩\d+[个份名位]/g, category: '虚假促销', level: 'warning', suggestion: '促销信息需真实，标注有效期和限制条件' },
+  { pattern: /免费领取|0元[获领]|不花一分钱|白送|白嫖/g, category: '虚假免费', level: 'warning', suggestion: '如有附加条件需明确标注，不得误导用户' },
+  // 诱导行为
+  { pattern: /点击领[取红]|马上抢|立即下单|错过.*?再等|不买.*?后悔/g, category: '诱导点击', level: 'warning', suggestion: '避免过度营造紧迫感和诱导性表述' },
+  { pattern: /日赚\d+|月入\d+[万千]|躺着赚|轻松月入|暴富|财务自由/g, category: '虚假收益', level: 'danger', suggestion: '严禁夸大收益承诺，需标注"投资有风险"等提示' },
+  // 违禁内容
+  { pattern: /壮阳|丰胸|减肥药|祛斑|脱发.*?根治|癌症.*?治愈/g, category: '违禁医疗', level: 'danger', suggestion: '医疗健康类需合规表述，不得承诺疗效' },
+  { pattern: /赌[博场]|彩票预测|内部消息|稳赚不赔|包赢/g, category: '违禁赌博', level: 'danger', suggestion: '严禁涉赌内容' },
+  // 侵权风险
+  { pattern: /微信官方|腾讯官方.*?推荐|抖音.*?认证|官方合作伙伴/g, category: '冒用品牌', level: 'danger', suggestion: '未经授权不得冒用平台官方名义' },
+  // 低质表述
+  { pattern: /[！!]{3,}|[？?]{3,}|\.{6,}/g, category: '低质标点', level: 'warning', suggestion: '避免过多重复标点，影响素材质量评分' },
+  { pattern: /加微信|加我微|加V|➕V|➕微|私聊|私我/g, category: '站外引流', level: 'warning', suggestion: '部分行业限制站外引流表述，请确认行业白名单' },
+];
+
+const EXAMPLE_TEXTS = [
+  '全国第一的减肥产品，100%有效！原价998现价98，限时抢购！！！',
+  '央视推荐好物，日赚5000不是梦，点击领取免费教程',
+  '专业团队服务，助力企业获客增长，已服务1000+客户',
+  '加微信领取行业报告，限时免费名额仅剩30个',
+];
+
+function loadExample() {
+  document.getElementById('review-input').value = EXAMPLE_TEXTS.join('\n');
+  updateCharCount();
+}
+
+function clearReview() {
+  document.getElementById('review-input').value = '';
+  document.getElementById('review-results').style.display = 'none';
+  document.getElementById('ai-rewrite-section').style.display = 'none';
+  updateCharCount();
+}
+
+function updateCharCount() {
+  const text = document.getElementById('review-input').value;
+  document.getElementById('char-count').textContent = text.length;
+  document.getElementById('line-count').textContent = text.split('\n').filter(l => l.trim()).length;
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('review-input');
+  if (input) input.addEventListener('input', updateCharCount);
+});
+
+function startReview() {
+  const text = document.getElementById('review-input').value.trim();
+  if (!text) { alert('请先输入文案'); return; }
+
+  const lines = text.split('\n').filter(l => l.trim());
+  const results = [];
+
+  lines.forEach((line, idx) => {
+    let lineResults = [];
+    REVIEW_RULES.forEach(rule => {
+      const matches = line.match(rule.pattern);
+      if (matches) {
+        lineResults.push({
+          line: idx + 1,
+          text: line,
+          matches: matches,
+          category: rule.category,
+          level: rule.level,
+          suggestion: rule.suggestion
+        });
+      }
+    });
+    if (lineResults.length === 0) {
+      results.push({ line: idx + 1, text: line, level: 'safe', category: '合规', matches: [] });
+    } else {
+      results.push(...lineResults);
+    }
+  });
+
+  renderResults(results);
+
+  // AI rewrite if enabled
+  if (document.getElementById('ai-rewrite-toggle').checked) {
+    const dangerItems = results.filter(r => r.level !== 'safe');
+    if (dangerItems.length > 0) {
+      startAIRewrite(dangerItems);
+    }
+  }
+}
+
+function renderResults(results) {
+  const container = document.getElementById('results-container');
+  container.innerHTML = results.map(r => {
+    let highlightedText = r.text;
+    if (r.matches && r.matches.length > 0) {
+      r.matches.forEach(m => {
+        highlightedText = highlightedText.replace(m, `<span class="match">${m}</span>`);
+      });
+    }
+    return `<div class="result-item ${r.level}">
+      <div class="level">${r.level === 'danger' ? '🚫 高风险' : r.level === 'warning' ? '⚠️ 中风险' : '✅ 合规'} · ${r.category}</div>
+      <div class="text">第${r.line}条: ${highlightedText}</div>
+      ${r.suggestion ? `<div class="suggestion">💡 ${r.suggestion}</div>` : ''}
+    </div>`;
+  }).join('');
+  document.getElementById('review-results').style.display = 'block';
+}
+
+// ==================== DeepSeek AI Rewrite ====================
+const DEEPSEEK_API_KEY = 'sk-8f90bc88af6441258b980aa1dc351696';
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
+
+async function startAIRewrite(dangerItems) {
+  const section = document.getElementById('ai-rewrite-section');
+  const container = document.getElementById('ai-rewrite-container');
+  section.style.display = 'block';
+  container.innerHTML = '<div class="ai-loading"><span class="spinner"></span>AI 正在分析并生成合规改写建议...</div>';
+
+  const problemTexts = dangerItems.map(item => `- 原文: "${item.text}" (问题: ${item.category})`).join('\n');
+
+  const prompt = `你是一位腾讯广告平台的合规审核专家。以下是一批存在违规风险的广告文案，请逐条给出合规改写建议。
+
+要求：
+1. 保持原文的核心卖点和营销意图
+2. 去除所有违规表述（绝对化用语、虚假承诺、诱导点击等）
+3. 改写后的文案要自然、有吸引力，不能太生硬
+4. 每条给出【原文】【问题】【改写】三部分
+
+违规文案：
+${problemTexts}`;
+
+  try {
+    const response = await fetch(DEEPSEEK_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: '你是腾讯广告平台合规审核专家，熟悉所有广告法规和平台规则。请用简洁专业的语气回答。' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 2048,
+        stream: true
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    // Stream response
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    container.innerHTML = '';
+    let fullText = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
+          if (data === '[DONE]') break;
+          try {
+            const json = JSON.parse(data);
+            const content = json.choices?.[0]?.delta?.content || '';
+            fullText += content;
+            container.textContent = fullText;
+          } catch (e) {}
+        }
+      }
+    }
+
+    // Add copy button
+    container.innerHTML = fullText.replace(/\n/g, '<br>') + '<div style="margin-top:16px;text-align:right;"><button class="btn btn-secondary" onclick="copyAIResult()">📋 复制改写结果</button></div>';
+  } catch (error) {
+    container.innerHTML = `<div style="color:#ef4444;">AI 服务暂时不可用: ${error.message}<br>请稍后重试或关闭 AI 复审开关使用纯规则审核。</div>`;
+  }
+}
+
+function copyAIResult() {
+  const text = document.getElementById('ai-rewrite-container').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('已复制到剪贴板');
+  });
+}
+
+// ==================== Policy Timeline (Placeholder) ====================
+const POLICY_DATA = [
+  {
+    date: '2026-05-20',
+    title: '【待更新】广告素材合规新规公示',
+    desc: '平台将于6月1日起执行新版素材审核标准，涉及医疗、教育、金融三大行业。服务商需在过渡期内完成存量素材自查。',
+    tags: ['素材审核', '医疗', '教育', '金融']
+  },
+  {
+    date: '2026-05-15',
+    title: '【待更新】服务商分级管理办法调整',
+    desc: '根据最新考核标准，服务商星级评定将增加客户满意度和续费率两个维度。A级以上服务商可获得优先资源位。',
+    tags: ['服务商分级', '考核标准']
+  },
+  {
+    date: '2026-05-08',
+    title: '【待更新】投放优化工具升级通知',
+    desc: '智能出价、创意组件、人群包功能将于5月底完成升级，新增自动扩量和智能素材组合功能。建议服务商提前了解新功能。',
+    tags: ['工具升级', '智能投放']
+  },
+  {
+    date: '2026-04-28',
+    title: '【待更新】618 大促资源位开放申请',
+    desc: '618大促期间流量资源位已开放服务商代申请通道，截止日期6月5日。优先分配给近30天消耗达标的账户。',
+    tags: ['618大促', '资源位']
+  },
+  {
+    date: '2026-04-15',
+    title: '【待更新】隐私合规指引更新',
+    desc: '根据最新个人信息保护法实施细则，广告主和服务商需确保数据采集链路合规，特别是落地页表单收集场景。',
+    tags: ['隐私合规', '数据安全']
+  }
+];
+
+function renderPolicyTimeline() {
+  const container = document.getElementById('policy-timeline');
+  container.innerHTML = POLICY_DATA.map(item => `
+    <div class="timeline-item">
+      <div class="date">${item.date}</div>
+      <div class="title">${item.title}</div>
+      <div class="desc">${item.desc}</div>
+      <div class="tags">${item.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', renderPolicyTimeline);
+</script>
+</body>
+</html>
