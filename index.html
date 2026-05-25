@@ -113,6 +113,16 @@ textarea:focus { outline: none; border-color: #667eea; }
 .agent-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
 .agent-desc { font-size: 12px; color: #666; line-height: 1.5; }
 .agent-tag { position: absolute; top: 10px; right: 10px; font-size: 10px; padding: 2px 8px; border-radius: 8px; background: #667eea; color: #fff; }
+
+/* Case cards */
+.case-card { border: 1px solid #e8e8f0; border-radius: 12px; padding: 20px; transition: all 0.2s; }
+.case-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.case-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.case-industry { font-size: 11px; padding: 3px 8px; background: #f0f0ff; color: #667eea; border-radius: 4px; font-weight: 500; }
+.case-result { font-size: 12px; color: #22c55e; font-weight: 600; }
+.case-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.case-desc { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 10px; }
+.case-tags .tag { display: inline-block; padding: 2px 8px; background: #f5f5f5; color: #666; font-size: 11px; border-radius: 4px; margin-right: 6px; }
 </style>
 </head>
 <body>
@@ -312,11 +322,43 @@ if (sessionStorage.getItem('sp_auth')) {
           <p style="font-size:12px;color:#999;margin-top:8px;">* 以上为示例数据，实际数据接入后自动更新</p>
         </div>
 
-        <!-- 嵌入原有页面 -->
+        <!-- 实战案例 -->
         <div class="card">
-          <div class="card-title">拓客工具</div>
-          <div style="height:600px;border-radius:8px;overflow:hidden;border:1px solid #e8e8f0;">
-            <iframe src="https://extend-bj.clink.cn/customize-tencent/index.html" style="width:100%;height:100%;border:none;" allow="clipboard-read; clipboard-write"></iframe>
+          <div class="card-title">实战案例</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;">
+            <div class="case-card">
+              <div class="case-header">
+                <span class="case-industry">教育培训</span>
+                <span class="case-result">获客成本降低 38%</span>
+              </div>
+              <div class="case-title">某职业教育机构 · AI外呼+智能运营组合拳</div>
+              <div class="case-desc">通过AI外呼触达历史线索库中沉默用户，结合智能标签分层运营，3周内激活2,400+意向客户，外呼接通率达45%，加微率22%。</div>
+              <div class="case-tags">
+                <span class="tag">AI外呼</span><span class="tag">线索激活</span><span class="tag">分层运营</span>
+              </div>
+            </div>
+            <div class="case-card">
+              <div class="case-header">
+                <span class="case-industry">本地生活</span>
+                <span class="case-result">新客增长 210%</span>
+              </div>
+              <div class="case-title">某连锁餐饮品牌 · AI拓客精准获客</div>
+              <div class="case-desc">利用AI拓客分析周边3公里竞品投放数据和人群画像，智能生成定向策略，单月新增到店客户1,800+，ROI提升至1:4.2。</div>
+              <div class="case-tags">
+                <span class="tag">AI拓客</span><span class="tag">LBS定向</span><span class="tag">竞品分析</span>
+              </div>
+            </div>
+            <div class="case-card">
+              <div class="case-header">
+                <span class="case-industry">电商零售</span>
+                <span class="case-result">续费率提升至 85%</span>
+              </div>
+              <div class="case-title">某美妆品牌服务商 · AI运营客户留存</div>
+              <div class="case-desc">接入AI运营后自动监控客户投放健康度，异常时主动触达提醒并给出优化建议，客户满意度评分从3.2提升至4.6，续费率提升21个百分点。</div>
+              <div class="case-tags">
+                <span class="tag">AI运营</span><span class="tag">客户留存</span><span class="tag">主动预警</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
